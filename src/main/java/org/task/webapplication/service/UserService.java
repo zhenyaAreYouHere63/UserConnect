@@ -1,5 +1,6 @@
 package org.task.webapplication.service;
 
+import org.task.webapplication.LoginRequest;
 import org.task.webapplication.dto.UserDto;
 import org.task.webapplication.entity.User;
 import java.util.List;
@@ -9,7 +10,7 @@ public interface UserService {
 
     User registerUser(UserDto userDto);
 
-    void loginUser(UserDto userDto);
+    String loginUser(LoginRequest loginRequest);
 
     String resendEmailConfirmation(UserDto userDto);
 

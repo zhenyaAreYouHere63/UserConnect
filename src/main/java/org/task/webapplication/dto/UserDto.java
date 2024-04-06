@@ -1,11 +1,13 @@
 package org.task.webapplication.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import org.task.webapplication.entity.Role;
 import java.util.Objects;
 import java.util.UUID;
 
 public record UserDto(
         UUID uuid,
+        Role role,
         @NotBlank(message = "Field email cannot be blank")
         String email,
         @NotBlank(message = "Field password cannot be blank")

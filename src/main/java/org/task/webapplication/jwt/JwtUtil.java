@@ -2,10 +2,14 @@ package org.task.webapplication.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.security.Key;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -14,9 +18,21 @@ import java.util.Map;
 
 @Service
 public class JwtUtil {
+    private KeyPair keyPair;
 
-    @Value("app.jwtSecret")
-    private String secretKey;
+    public JwtUtil() {
+        this.keyPair = generateKeyPair();
+    }
+
+    private KeyPair generateKeyPair() {
+        try {
+            KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+            generator.initialize(2048);
+            return generator.generateKeyPair();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Error generating RSA key pair " + e);
+        }
+    }
 
     public String generateToken(String subject) {
         return generateToken(subject, Map.of());
@@ -37,7 +53,7 @@ public class JwtUtil {
                 .subject(subject)
                 .issuedAt(Date.from(Instant.now()))
                 .expiration(Date.from(Instant.now().plus(15, ChronoUnit.HOURS)))
-                .signWith(getSigningKey())
+                .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
                 .compact();
     }
 
@@ -47,14 +63,10 @@ public class JwtUtil {
 
     private Claims getClaims(String token) {
         return Jwts.parser()
-                .setSigningKey(getSigningKey())
+                .setSigningKey(keyPair.getPublic())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-    }
-
-    private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
     public boolean isTokenValid(String jwt, String username) {

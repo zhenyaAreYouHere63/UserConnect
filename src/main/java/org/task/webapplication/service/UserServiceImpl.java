@@ -3,6 +3,7 @@ package org.task.webapplication.service;
 import lombok.RequiredArgsConstructor;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
+import org.task.webapplication.LoginRequest;
 import org.task.webapplication.dto.UserDto;
 import org.task.webapplication.entity.User;
 import org.task.webapplication.jwt.JwtUtil;
@@ -27,21 +28,30 @@ public class UserServiceImpl implements UserService {
     public User registerUser(UserDto userDto) {
         User userToSave = userMapper.mapUserDtoToUser(userDto);
 
-        User savedUser = repository.save(userToSave);
-
-        String token = jwtUtil.generateToken(savedUser.getEmail());
+        String token = jwtUtil.generateToken(userToSave.getEmail());
 
         String confirmationToken = "http://587.com/confirm?token=" + token;
         emailService.sendEmailVerification(userToSave.getEmail(), "Confirm email address", "Please, follow the link to verify your email address: " +  confirmationToken);
 
-        savedUser.setIsEmailVerified(true);
+        userToSave.setIsEmailVerified(true);
 
-        return savedUser;
+        return repository.save(userToSave);
     }
 
     @Override
-    public void loginUser(UserDto userDto) {
+    public String loginUser(LoginRequest loginRequest) {
 
+        User user = repository.findUserByEmail(loginRequest.email());
+
+        if (user == null || !user.getPassword().equals(loginRequest.password())) {
+            throw new RuntimeException("Invalid email or password");
+        }
+
+        if (!user.getIsEmailVerified()) {
+            throw new RuntimeException("Email not verified. Please verify your email first");
+        }
+
+        return jwtUtil.generateToken(user.getEmail());
     }
 
     @Override

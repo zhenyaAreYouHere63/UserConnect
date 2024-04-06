@@ -14,5 +14,6 @@ public interface UserMapper {
     UserDto mapUserToUserDto(User user);
 
     @Mapping(target = "uuid", expression = "java(java.util.UUID.randomUUID())")
+    @Mapping(target = "role", constant = "USER")
     User mapUserDtoToUser(UserDto userDto) ;
 }

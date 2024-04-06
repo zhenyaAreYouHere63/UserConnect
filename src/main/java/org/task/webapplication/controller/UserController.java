@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.task.webapplication.LoginRequest;
 import org.task.webapplication.dto.UserDto;
 import org.task.webapplication.entity.User;
 import org.task.webapplication.service.UserService;
@@ -26,6 +27,13 @@ public class UserController {
                 .buildAndExpand(user.getId()).toUri();
 
         return ResponseEntity.created(location).body(user);
+    }
+
+    @PostMapping("/api/auth/login")
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
+        String token = userService.loginUser(loginRequest);
+
+        return ResponseEntity.ok(token);
     }
 
     @GetMapping("/api/auth/resend/email-confirmation/{email}")
