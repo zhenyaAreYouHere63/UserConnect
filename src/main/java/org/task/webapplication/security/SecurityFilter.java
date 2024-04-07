@@ -37,6 +37,9 @@ public class SecurityFilter {
                                 .requestMatchers(GET, "/ping").permitAll()
                                 .requestMatchers(POST, "/api/auth/signup").permitAll()
                                 .requestMatchers(POST, "/api/auth/login").permitAll()
+                                .requestMatchers(GET, "/api/auth/resend/email-confirmation/").permitAll()
+                                .requestMatchers(GET, "/api/auth/email-confirm/").permitAll()
+                                .anyRequest().permitAll()
                 )
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint((request, response, authException) -> {}))

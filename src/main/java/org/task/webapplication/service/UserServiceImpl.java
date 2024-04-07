@@ -1,77 +1,102 @@
 package org.task.webapplication.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
-import org.task.webapplication.LoginRequest;
+import org.task.webapplication.request.ChangePasswordRequest;
+import org.task.webapplication.request.LoginRequest;
 import org.task.webapplication.dto.UserDto;
 import org.task.webapplication.entity.User;
-import org.task.webapplication.jwt.JwtUtil;
+import org.task.webapplication.jwt.JwtProvider;
 import org.task.webapplication.mail.EmailService;
 import org.task.webapplication.mapper.UserMapper;
 import org.task.webapplication.repository.UserRepository;
 import java.util.List;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+
+    private final HttpServletRequest servlet;
     private final UserMapper userMapper = Mappers.getMapper(UserMapper.class);
 
     private final UserRepository repository;
 
     private final EmailService emailService;
 
-    private final JwtUtil jwtUtil;
+    private final JwtProvider jwtProvider;
 
     @Override
-    public User registerUser(UserDto userDto) {
+    public String registerUser(UserDto userDto) {
         User userToSave = userMapper.mapUserDtoToUser(userDto);
 
-        String token = jwtUtil.generateToken(userToSave.getEmail());
+        String token = jwtProvider.generateToken(userToSave.getEmail());
 
-        String confirmationToken = "http://587.com/confirm?token=" + token;
-        emailService.sendEmailVerification(userToSave.getEmail(), "Confirm email address", "Please, follow the link to verify your email address: " +  confirmationToken);
+        String link = "www.google.com";
+        emailService.sendEmailVerification(userToSave.getEmail(), "Confirm email address", "Please, follow the link to verify your email address: " + link);
 
         userToSave.setIsEmailVerified(true);
+        repository.save(userToSave);
 
-        return repository.save(userToSave);
+        return token;
     }
 
     @Override
     public String loginUser(LoginRequest loginRequest) {
 
-        User user = repository.findUserByEmail(loginRequest.email());
+        User foundUser = repository.findUserByEmail(loginRequest.email())
+                .orElseThrow(() -> new UserNotFoundException("User with " + loginRequest.email() + " not found"));
 
-        if (user == null || !user.getPassword().equals(loginRequest.password())) {
-            throw new RuntimeException("Invalid email or password");
+        if (!foundUser.getPassword().equals(loginRequest.password())) {
+            throw new InvalidCredentialsException("Invalid password");
         }
+
+        if (!foundUser.getIsEmailVerified()) {
+            throw new EmailNotVerifiedException("Email not verified. Please verify your email first");
+        }
+
+        return jwtProvider.generateToken(foundUser.getEmail());
+    }
+
+    @Override
+    public void resendEmailConfirmation(String email) {
+        User user = repository.findUserByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User with " + email + " not found"));
 
         if (!user.getIsEmailVerified()) {
-            throw new RuntimeException("Email not verified. Please verify your email first");
+            throw new EmailNotVerifiedException("Email not verified. Please verify your email first");
         }
 
-        return jwtUtil.generateToken(user.getEmail());
+        String link = "www.google.com";
+        emailService.sendEmailVerification(email,
+                "Confirm email address", "Please, follow the link to verify your email address: " + link);
     }
 
     @Override
-    public String resendEmailConfirmation(UserDto userDto) {
-        return null;
+    public void confirmEmail(String token) {
+        String email = jwtProvider.getSubject(token);
+
+        User user = repository.findUserByEmail(email)
+                .orElseThrow(() -> new EmailNotVerifiedException("Email not confirmed"));
     }
 
     @Override
-    public String confirmEmail(UserDto userDto) {
-        return null;
+    public void changePasswordEmail(String email) {
+        repository.findUserByEmail(email);
     }
 
     @Override
-    public String changePasswordEmail(UserDto userDto) {
-        return null;
-    }
+    public void changePassword(ChangePasswordRequest request) {
+        String token = request.token();
 
-    @Override
-    public String changePassword(String password) {
-        return null;
+        String email = jwtProvider.getSubject(token);
+        User foundUser = repository.findUserByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User with " + email +  " not found"));
+
+        foundUser.setPassword(request.newPassword());
+        repository.save(foundUser);
     }
 
     @Override
@@ -80,12 +105,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUserProfile(UUID uuid) {
-        return null;
+    public User getUserProfile() {
+        String token = servlet.getHeader("Authorization");
+
+        String[] tokenParts = token.split("\\s+");
+        String jwtToken = tokenParts[1];
+
+        String email = jwtProvider.getSubject(jwtToken);
+
+        return repository.findUserByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User with " + email + " not found"));
     }
 
     @Override
-    public List<User> getAllUsers() {
-        return null;
+    public List<UserDto> getAllUsers() {
+        return repository.findAll()
+                .stream().map(userMapper::mapUserToUserDto)
+                .collect(Collectors.toList());
     }
 }

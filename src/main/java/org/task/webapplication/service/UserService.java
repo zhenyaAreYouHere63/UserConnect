@@ -1,6 +1,7 @@
 package org.task.webapplication.service;
 
-import org.task.webapplication.LoginRequest;
+import org.task.webapplication.request.ChangePasswordRequest;
+import org.task.webapplication.request.LoginRequest;
 import org.task.webapplication.dto.UserDto;
 import org.task.webapplication.entity.User;
 import java.util.List;
@@ -8,21 +9,21 @@ import java.util.UUID;
 
 public interface UserService {
 
-    User registerUser(UserDto userDto);
+    String registerUser(UserDto userDto);
 
     String loginUser(LoginRequest loginRequest);
 
-    String resendEmailConfirmation(UserDto userDto);
+    void resendEmailConfirmation(String email);
 
-    String confirmEmail(UserDto userDto);
+    void confirmEmail(String token);
 
-    String changePasswordEmail(UserDto userDto);
+    void changePasswordEmail(String email);
 
-    String changePassword(String password);
+    void changePassword(ChangePasswordRequest request);
 
     String ping();
 
-    User getUserProfile(UUID uuid);
+    User getUserProfile();
 
-    List<User> getAllUsers();
+    List<UserDto> getAllUsers();
 }

@@ -1,4 +1,4 @@
-package org.task.webapplication;
+package org.task.webapplication.request;
 
 import jakarta.validation.constraints.NotBlank;
 import java.util.Objects;

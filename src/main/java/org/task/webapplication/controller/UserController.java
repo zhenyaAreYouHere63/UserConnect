@@ -2,15 +2,14 @@ package org.task.webapplication.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import org.task.webapplication.LoginRequest;
-import org.task.webapplication.dto.UserDto;
 import org.task.webapplication.entity.User;
+import org.task.webapplication.request.ChangePasswordRequest;
+import org.task.webapplication.request.LoginRequest;
+import org.task.webapplication.dto.UserDto;
 import org.task.webapplication.service.UserService;
-import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,46 +18,50 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/api/auth/signup")
-    public ResponseEntity<?> registration(@Valid @RequestBody UserDto userDto) {
-        User user = userService.registerUser(userDto);
-
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentContextPath().path("/api/auth/signup")
-                .buildAndExpand(user.getId()).toUri();
-
-        return ResponseEntity.created(location).body(user);
+    @ResponseStatus(HttpStatus.CREATED)
+    public String registration(@Valid @RequestBody UserDto userDto) {
+        return userService.registerUser(userDto);
     }
 
     @PostMapping("/api/auth/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
-        String token = userService.loginUser(loginRequest);
-
-        return ResponseEntity.ok(token);
+    @ResponseStatus(HttpStatus.CREATED)
+    public String login(@Valid @RequestBody LoginRequest loginRequest) {
+        return userService.loginUser(loginRequest);
     }
 
     @GetMapping("/api/auth/resend/email-confirmation/{email}")
+    @ResponseStatus(HttpStatus.OK)
     public void resendEmailConfirmation(@PathVariable String email) {
-
+        userService.resendEmailConfirmation(email);
     }
 
     @GetMapping("/api/auth/email-confirm/{token}")
+    @ResponseStatus(HttpStatus.OK)
     public void confirmEmail(@PathVariable String token) {
+        userService.confirmEmail(token);
+    }
 
+    @GetMapping("/api/auth/send/reset-password-email/{email}")
+    @ResponseStatus(HttpStatus.OK)
+    public void ResetPasswordEmail(@PathVariable String email) {
+        userService.changePasswordEmail(email);
     }
 
     @PostMapping("api/auth/change-password")
-    public void changePassword() {
-
+    @ResponseStatus(HttpStatus.CREATED)
+    public void changePassword(@RequestBody ChangePasswordRequest request) {
+        userService.changePassword(request);
     }
 
     @GetMapping("api/user/current-user")
-    public void getCurrentUser() {
-
+    @ResponseStatus(HttpStatus.OK)
+    public User getCurrentUser() {
+        return userService.getUserProfile();
     }
 
     @GetMapping("api/user/all")
-    public void getAllUsers() {
-
+    public List<UserDto> getAllUsers() {
+        return userService.getAllUsers();
     }
 
     @GetMapping("/ping")

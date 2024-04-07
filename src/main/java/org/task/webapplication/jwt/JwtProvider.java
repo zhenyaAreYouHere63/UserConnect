@@ -1,12 +1,10 @@
 package org.task.webapplication.jwt;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.JwtParserBuilder;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
@@ -17,10 +15,10 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class JwtUtil {
+public class JwtProvider {
     private KeyPair keyPair;
 
-    public JwtUtil() {
+    public JwtProvider() {
         this.keyPair = generateKeyPair();
     }
 
@@ -38,7 +36,7 @@ public class JwtUtil {
         return generateToken(subject, Map.of());
     }
 
-    public String generateToken(String subject, String ...scopes) {
+    public String generateToken(String subject, String... scopes) {
         return generateToken(subject, Map.of("scopes", scopes));
     }
 
@@ -53,7 +51,7 @@ public class JwtUtil {
                 .subject(subject)
                 .issuedAt(Date.from(Instant.now()))
                 .expiration(Date.from(Instant.now().plus(15, ChronoUnit.HOURS)))
-                .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
+                .signWith(keyPair.getPrivate(), Jwts.SIG.RS256)
                 .compact();
     }
 
@@ -63,7 +61,7 @@ public class JwtUtil {
 
     private Claims getClaims(String token) {
         return Jwts.parser()
-                .setSigningKey(keyPair.getPublic())
+                .verifyWith(keyPair.getPublic())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
