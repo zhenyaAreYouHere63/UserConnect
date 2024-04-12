@@ -1,6 +1,7 @@
 package org.task.authenticify.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ public class AuthController {
 
     @DeleteMapping("/api/auth/logout/{email}")
     @ResponseStatus(HttpStatus.OK)
-    public void logout(@PathVariable String email) {
+    public void logout(@PathVariable @NotBlank String email) {
         authService.logout(email);
     }
 }

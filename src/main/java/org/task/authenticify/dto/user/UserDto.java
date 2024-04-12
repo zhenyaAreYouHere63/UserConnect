@@ -9,7 +9,8 @@ public record UserDto(
 
         UUID uuid,
 
-        Role role,
+//        Role role,
+
         @NotBlank(message = "Field email cannot be blank")
         String email,
 

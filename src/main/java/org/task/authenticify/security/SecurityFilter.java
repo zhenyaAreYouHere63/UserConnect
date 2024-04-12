@@ -37,8 +37,8 @@ public class SecurityFilter {
                 .authorizeHttpRequests(
                         (authz) -> authz
                                 .requestMatchers(POST, "/api/auth/signup").permitAll()
+                                .requestMatchers(POST, "/api/auth/login").permitAll()
                                 .requestMatchers(GET, "/api/auth/resend/email-confirmation/").permitAll()
-                                .requestMatchers(POST, "/api/auth/login").authenticated()
                                 .requestMatchers(GET, "/api/auth/email-confirm/").authenticated()
                                 .anyRequest().permitAll()
                 )
