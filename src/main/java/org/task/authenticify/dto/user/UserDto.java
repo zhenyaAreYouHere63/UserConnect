@@ -9,7 +9,7 @@ public record UserDto(
 
         UUID uuid,
 
-//        Role role,
+        Role role,
 
         @NotBlank(message = "Field email cannot be blank")
         String email,
@@ -18,15 +18,15 @@ public record UserDto(
         String password
 ) {
         @Override
-        public boolean equals(Object obj) {
-                if (this == obj) return true;
-                if (obj == null || getClass() != obj.getClass()) return false;
-                UserDto userDto = (UserDto) obj;
-                return Objects.equals(uuid, userDto.uuid);
+        public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                UserDto userDto = (UserDto) o;
+                return Objects.equals(uuid, userDto.uuid) && role == userDto.role && Objects.equals(email, userDto.email) && Objects.equals(password, userDto.password);
         }
 
         @Override
         public int hashCode() {
-                return Objects.hashCode(uuid);
+                return Objects.hash(uuid, role, email, password);
         }
 }

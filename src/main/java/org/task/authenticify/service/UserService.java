@@ -1,9 +1,8 @@
 package org.task.authenticify.service;
 
-import org.task.authenticify.dto.auth.TokenPair;
+import org.task.authenticify.entity.token.TokenPair;
 import org.task.authenticify.request.ChangePasswordRequest;
 import org.task.authenticify.dto.user.UserDto;
-import org.task.authenticify.entity.user.User;
 import java.util.List;
 
 public interface UserService {
@@ -20,7 +19,7 @@ public interface UserService {
 
     String ping();
 
-    User getUserProfile();
+    UserDto getUserProfile();
 
     List<UserDto> getAllUsers();
 }

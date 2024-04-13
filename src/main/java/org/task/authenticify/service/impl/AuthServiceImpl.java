@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.task.authenticify.dto.auth.CredentialsDto;
-import org.task.authenticify.dto.auth.TokenPair;
+import org.task.authenticify.entity.token.TokenPair;
 import org.task.authenticify.entity.user.User;
 import org.task.authenticify.exception.external.InvalidCredentialsException;
 import org.task.authenticify.exception.external.UserNotFoundException;
@@ -25,7 +25,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public TokenPair login(CredentialsDto credentialsDto) {
         User foundUser = userRepository.findUserByEmail(credentialsDto.getEmail())
-                .orElseThrow(() -> new UserNotFoundException("User with " + credentialsDto.getEmail() + " not found"));
+                .orElseThrow(() -> new UserNotFoundException("User with [" + credentialsDto.getEmail() + "] not found"));
 
         if(!passwordEncoder.matches(credentialsDto.getPassword(), foundUser.getPassword())) {
             throw new InvalidCredentialsException("Invalid password");
@@ -39,7 +39,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void logout(String email) {
         userRepository.findUserByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User with " + email + " not found"));
+                .orElseThrow(() -> new UserNotFoundException("User with [" + email + "] not found"));
 
         jwtService.deleteAccessToken(email);
         jwtService.deleteRefreshToken(email);

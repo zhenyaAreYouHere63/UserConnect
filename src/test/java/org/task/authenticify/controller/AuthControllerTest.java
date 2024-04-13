@@ -16,7 +16,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.task.authenticify.dto.auth.CredentialsDto;
-import org.task.authenticify.dto.auth.TokenPair;
+import org.task.authenticify.entity.token.TokenPair;
 import org.task.authenticify.service.AuthService;
 import org.task.authenticify.service.JwtService;
 

@@ -1,4 +1,4 @@
-package org.task.authenticify.dto.auth;
+package org.task.authenticify.entity.token;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

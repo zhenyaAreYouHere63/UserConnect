@@ -2,10 +2,11 @@ package org.task.authenticify.service.impl;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
-import org.task.authenticify.dto.auth.TokenPair;
+import org.task.authenticify.entity.token.TokenPair;
 import org.task.authenticify.exception.external.EmailNotVerifiedException;
 import org.task.authenticify.exception.external.InvalidCredentialsException;
 import org.task.authenticify.request.ChangePasswordRequest;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     private final HttpServletRequest servlet;
@@ -38,7 +40,7 @@ public class UserServiceImpl implements UserService {
     public TokenPair registerUser(UserDto userDto) {
 
         if(userRepository.findUserByEmail(userDto.email()).isPresent()) {
-            throw new InvalidCredentialsException("Invalid email [" + userDto.email() + "]. Given email is already taken" );
+            throw new InvalidCredentialsException("Invalid email [" + userDto.email() + "]. Given email is already taken");
         }
 
         String hashedPassword = BCrypt.hashpw(userDto.password(), BCrypt.gensalt());
@@ -46,21 +48,21 @@ public class UserServiceImpl implements UserService {
         User userToSave = userMapper.mapUserDtoToUser(userDto);
         userToSave.setPassword(hashedPassword);
 
-        TokenPair tokenPair = jwtService.issueTokenPair(userToSave);
-
         String link = "www.google.com";
         emailService.sendEmailVerification(userToSave.getEmail(), "Confirm email address", "Please, follow the link to verify your email address: " + link);
-
         userToSave.setIsEmailVerified(true);
-        userRepository.save(userToSave);
 
+        User savedUser = userRepository.save(userToSave);
+
+        TokenPair tokenPair = jwtService.issueTokenPair(savedUser);
+        log.info("User with email: [" + userDto.email() + "] has registered");
         return tokenPair;
     }
 
     @Override
     public void resendEmailConfirmation(String email) {
         User user = userRepository.findUserByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User with " + email + " not found"));
+                .orElseThrow(() -> new UserNotFoundException("User with [" + email + "] not found"));
 
         String link = "www.google.com";
         emailService.sendEmailVerification(email,
@@ -79,19 +81,23 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void changePasswordEmail(String email) {
-        userRepository.findUserByEmail(email);
+        userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User with [" + email +  "] not found"));
+
+        String link = "www.google.com";
+        emailService.sendEmailVerification(email,
+                "Change password email", "Please, follow the link to change your password: " + link);
     }
 
     @Override
     public void changePassword(ChangePasswordRequest request) {
         String token = request.token();
-
         String email = jwtService.parseAccessToken(token).tokenClaims().email();
+
         User foundUser = userRepository.findUserByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User with " + email +  " not found"));
+                .orElseThrow(() -> new UserNotFoundException("User with [" + email +  "] not found"));
 
         String hashedPassword = BCrypt.hashpw(request.newPassword(), BCrypt.gensalt());
-
         foundUser.setPassword(hashedPassword);
 
         userRepository.save(foundUser);
@@ -103,7 +109,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUserProfile() {
+    public UserDto getUserProfile() {
         String token = servlet.getHeader("Authorization");
 
         String[] tokenParts = token.split("\\s+");
@@ -112,6 +118,7 @@ public class UserServiceImpl implements UserService {
         String email = jwtService.parseAccessToken(jwtToken).tokenClaims().email();
 
         return userRepository.findUserByEmail(email)
+                .map(userMapper::mapUserToUserDto)
                 .orElseThrow(() -> new UserNotFoundException("User with " + email + " not found"));
     }
 

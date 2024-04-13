@@ -5,7 +5,7 @@ import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.task.authenticify.dto.auth.TokenPair;
+import org.task.authenticify.entity.token.TokenPair;
 import org.task.authenticify.entity.token.AccessToken;
 import org.task.authenticify.entity.token.RefreshToken;
 import org.task.authenticify.entity.token.adapter.AccessTokenHandlerAdapter;
@@ -15,7 +15,6 @@ import org.task.authenticify.exception.external.InvalidTokenException;
 import org.task.authenticify.jwt.JwtProperties;
 import org.task.authenticify.service.JwtService;
 import org.task.authenticify.service.util.KeyUtils;
-import static org.task.authenticify.service.util.TimeUtils.convertLocaDateTimeToDate;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -27,6 +26,7 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import static org.task.authenticify.service.util.TimeUtils.convertLocaDateTimeToDate;
 
 @Service
 @Slf4j
@@ -41,7 +41,6 @@ public class JwtServiceImpl implements JwtService {
     private final PrivateKey accessTokenPrivateKey;
     private final JwtParser accessTokenParser;
     private final AccessTokenHandlerAdapter accessTokenAdapter;
-
 
     private final Map<String, String> accessTokenStorage = new ConcurrentHashMap<>();
 

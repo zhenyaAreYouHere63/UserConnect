@@ -1,6 +1,6 @@
 package org.task.authenticify.service;
 
-import org.task.authenticify.dto.auth.TokenPair;
+import org.task.authenticify.entity.token.TokenPair;
 import org.task.authenticify.entity.token.AccessToken;
 import org.task.authenticify.entity.token.RefreshToken;
 import org.task.authenticify.entity.user.User;

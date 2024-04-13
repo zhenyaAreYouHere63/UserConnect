@@ -1,7 +1,7 @@
 package org.task.authenticify.service;
 
 import org.task.authenticify.dto.auth.CredentialsDto;
-import org.task.authenticify.dto.auth.TokenPair;
+import org.task.authenticify.entity.token.TokenPair;
 
 public interface AuthService {
 
