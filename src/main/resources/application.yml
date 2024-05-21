@@ -3,6 +3,7 @@ server:
 
 spring:
   application:
+<<<<<<< HEAD
     name: AuthenticifyApplication
 
   datasource:
@@ -10,12 +11,28 @@ spring:
     username: postgres
     password: postgres
     url: jdbc:postgresql://localhost:5432/web-application
+=======
+    name: UserConnect
+  config:
+    location: file:/path/to/application-local.yml
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    username: ${USERCONNECT_DATABASE_USERNAME}
+    password: ${USERCONNECT_DATABASE_PASSWORD}
+    url: ${USERCONNECT_DATABASE_URL}
+>>>>>>> 0d32522 (Updated README.md)
 
   mail:
     host: smtp.gmail.com
     port: 587
+<<<<<<< HEAD
     username: zhenyabaraniuk@gmail.com
     password: xopl tpme lvsk khmm
+=======
+    username: ${USERCONNECT_MAIL_USERNAME}
+    password: ${USERCONNECT_MAIL_PASSWORD}
+>>>>>>> 0d32522 (Updated README.md)
     properties:
       mail:
         transport:
