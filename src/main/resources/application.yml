@@ -1,0 +1,39 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: UserConnect
+  config:
+    location: file:/path/to/application-local.yml
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    username: ${USERCONNECT_DATABASE_USERNAME}
+    password: ${USERCONNECT_DATABASE_PASSWORD}
+    url: ${USERCONNECT_DATABASE_URL}
+
+    properties:
+      mail:
+        transport:
+          protocol: true
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          ssl:
+            trust: smtp.gmail.com
+        debug: smtp
+
+  graphql:
+    cors:
+      allowed-headers: "*"
+      allowed-methods: "*"
+      exposed-headers: "*"
+      allowed-origins: "*"
+
+auth:
+  jwt:
+    refreshToken:
+      expirationTimeInMinutes: 1000
+    accessToken:
+      expirationTimeInMinutes: 30
